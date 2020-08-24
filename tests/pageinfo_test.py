@@ -138,3 +138,16 @@ class PageinfoTest(unittest.TestCase):
             '001.jpg': (1, 2, 5),
         }
         self._test_guess_pageinfo(images_dir, expected)
+
+    def test_guess_pageinfo_008(self):
+        """
+            jpg 画像でスクロール可能領域の検出がされにくいケース。
+            000 スクロール可能領域判定の閾値を 21 まで下げると解決する。
+            001 スクロール可能領域判定の閾値を 18 まで下げると解決する。
+        """
+        images_dir = get_images_absdir('008')
+        expected = {
+            '000.jpg': (2, 2, 5),
+            '001.jpg': (2, 2, 5),
+        }
+        self._test_guess_pageinfo(images_dir, expected)
