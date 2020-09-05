@@ -160,6 +160,9 @@ def detect_qp_region(im, debug_draw_image=False, debug_image_name=None):
 
     if debug_draw_image:
         cv2.drawContours(cropped, filtered_contours, -1, (0, 255, 0), 3)
+        # 以下はどうしてもデバッグ目的で輪郭検出の状況を知りたい場合のみ有効にする。
+        # 通常はコメントアウトしておく。
+        # cv2.drawContours(cropped, contours, -1, (0, 255, 255), 3)
         logger.debug('writing debug image: %s', debug_image_name)
         cv2.imwrite(debug_image_name, cropped)
 

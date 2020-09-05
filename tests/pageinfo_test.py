@@ -29,6 +29,23 @@ class PageinfoTest(unittest.TestCase):
                 except pageinfo.CannotGuessError as e:
                     self.fail(f'{impath}: {e}')
 
+    def _test_detect_qp_region(self, images_dir, expected):
+        for entry in os.listdir(images_dir):
+            if os.path.splitext(entry)[1] not in ('.png', '.jpg'):
+                continue
+            impath = os.path.join(images_dir, entry)
+            with self.subTest(image=impath):
+                im = cv2.imread(impath)
+                logger.debug(impath)
+                try:
+                    actual = pageinfo.detect_qp_region(im)
+                    if expected[entry]:
+                        self.assertIsNotNone(actual)
+                    else:
+                        self.assertIsNone(actual)
+                except pageinfo.CannotGuessError as e:
+                    self.fail(f'{impath}: {e}')
+
     def test_guess_pageinfo_000(self):
         images_dir = get_images_absdir('000')
         expected = {
@@ -151,3 +168,22 @@ class PageinfoTest(unittest.TestCase):
             '001.jpg': (2, 2, 5),
         }
         self._test_guess_pageinfo(images_dir, expected)
+
+    def test_guess_pageinfo_009(self):
+        """
+            NA 版のスクリーンショットでエラーが出るケース。
+            000 誤差の許容範囲を広げることで解決。
+            001 左下のボタンのせいでQP領域をうまく拾えない。解決不能。
+                None が返されることを確認。
+        """
+        images_dir = get_images_absdir('009')
+        pageinfo_expected = {
+            '000.png': (1, 1, 3),
+            '001.jpg': (2, 2, 4),
+        }
+        self._test_guess_pageinfo(images_dir, pageinfo_expected)
+        qp_expected = {
+            '000.png': True,
+            '001.jpg': False,
+        }
+        self._test_detect_qp_region(images_dir, qp_expected)
