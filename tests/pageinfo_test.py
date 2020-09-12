@@ -1,8 +1,10 @@
 import os
+import re
 import unittest
 from logging import getLogger
 
 import cv2
+import pytesseract
 
 import pageinfo
 
@@ -38,13 +40,46 @@ class PageinfoTest(unittest.TestCase):
                 im = cv2.imread(impath)
                 logger.debug(impath)
                 try:
-                    actual = pageinfo.detect_qp_region(im)
-                    if expected[entry]:
-                        self.assertIsNotNone(actual)
-                    else:
-                        self.assertIsNone(actual)
+                    coordinates = pageinfo.detect_qp_region(im)
+                    _expected = expected[entry]
+                    if _expected is None:
+                        self.assertIsNone(coordinates)
+                        continue
+
+                    topleft, bottomright = coordinates
+                    qp_region = im[topleft[1]:bottomright[1], topleft[0]:bottomright[0]]
+                    scan_text = self._extract_text_from_image(qp_region)
+                    actual = self._get_qp_from_text(scan_text)
+                    self.assertEqual(actual, _expected)
+
                 except pageinfo.CannotGuessError as e:
                     self.fail(f'{impath}: {e}')
+
+    def _extract_text_from_image(self, image):
+        """
+            via capy-drop-parser
+        """
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        _, qp_image = cv2.threshold(gray, 65, 255, cv2.THRESH_BINARY_INV)
+
+        return pytesseract.image_to_string(
+            qp_image,
+            config="-l eng --oem 1 --psm 7 -c tessedit_char_whitelist=,0123456789",
+        )
+
+    def _get_qp_from_text(self, text):
+        """
+            via capy-drop-parser
+        """
+        qp = 0
+        power = 1
+        # re matches left to right so reverse the list
+        # to process lower orders of magnitude first.
+        for match in re.findall("[0-9]+", text)[::-1]:
+            qp += int(match) * power
+            power *= 1000
+
+        return qp
 
     def test_guess_pageinfo_000(self):
         images_dir = get_images_absdir('000')
@@ -59,6 +94,20 @@ class PageinfoTest(unittest.TestCase):
             '007.png': (2, 2, 6),
         }
         self._test_guess_pageinfo(images_dir, expected)
+
+    def test_detect_qp_region_000(self):
+        images_dir = get_images_absdir('000')
+        expected = {
+            '000.png': 746196407,
+            '001.png': 746235637,
+            '002.png': 3893778,
+            '003.png': 17913226,
+            '004.png': 17997826,
+            '005.png': 17997826,
+            '006.png': 563947174,
+            '007.png': 563947174,
+        }
+        self._test_detect_qp_region(images_dir, expected)
 
     def test_guess_pageinfo_001(self):
         """
@@ -76,12 +125,31 @@ class PageinfoTest(unittest.TestCase):
         }
         self._test_guess_pageinfo(images_dir, expected)
 
+    def test_detect_qp_region_001(self):
+        images_dir = get_images_absdir('001')
+        expected = {
+            '000.png': 477523200,
+            '001.png': 75069014,
+            '002.png': 75069014,
+            '003.png': 75077524,
+            '004.png': 75094324,
+            '005.png': 75094324,
+        }
+        self._test_detect_qp_region(images_dir, expected)
+
     def test_guess_pageinfo_002(self):
         images_dir = get_images_absdir('002')
         expected = {
             '000.png': (2, 2, 5),
         }
         self._test_guess_pageinfo(images_dir, expected)
+
+    def test_detect_qp_region_002(self):
+        images_dir = get_images_absdir('002')
+        expected = {
+            '000.png': 981488422,
+        }
+        self._test_detect_qp_region(images_dir, expected)
 
     def test_guess_pageinfo_003(self):
         """
@@ -96,6 +164,16 @@ class PageinfoTest(unittest.TestCase):
         }
         self._test_guess_pageinfo(images_dir, expected)
 
+    def test_detect_qp_region_003(self):
+        images_dir = get_images_absdir('003')
+        expected = {
+            '000.png': 999999999,
+            '001.png': 229004798,
+            '002.png': 229004798,
+            '003.png': 229004798,
+        }
+        self._test_detect_qp_region(images_dir, expected)
+
     def test_guess_pageinfo_004(self):
         """
             スクロールバーの誤検出により認識エラーになる件について、
@@ -108,6 +186,13 @@ class PageinfoTest(unittest.TestCase):
             '000.png': (1, 1, 0),
         }
         self._test_guess_pageinfo(images_dir, expected)
+
+    def test_detect_qp_region_004(self):
+        images_dir = get_images_absdir('004')
+        expected = {
+            '000.png': 887919828,
+        }
+        self._test_detect_qp_region(images_dir, expected)
 
     def test_guess_pageinfo_005(self):
         """
@@ -129,6 +214,21 @@ class PageinfoTest(unittest.TestCase):
         }
         self._test_guess_pageinfo(images_dir, expected)
 
+    def test_detect_qp_region_005(self):
+        images_dir = get_images_absdir('005')
+        expected = {
+            '000.png': 333299361,
+            '000.jpg': 333299361,
+            '001.png': 764623092,
+            '001.jpg': 764623092,
+            '002.jpg': 813492669,
+            '003.png': 331312461,
+            '003.jpg': 331312461,
+            '004.png': 338050061,
+            '004.jpg': 338050061,
+        }
+        self._test_detect_qp_region(images_dir, expected)
+
     def test_guess_pageinfo_006(self):
         """
             閾値の設定が 26 以下ではスクロール可能領域の
@@ -140,10 +240,17 @@ class PageinfoTest(unittest.TestCase):
         }
         self._test_guess_pageinfo(images_dir, expected)
 
+    def test_detect_qp_region_006(self):
+        images_dir = get_images_absdir('006')
+        expected = {
+            '000.jpg': 74780614,
+        }
+        self._test_detect_qp_region(images_dir, expected)
+
     def test_guess_pageinfo_007(self):
         """
-            jpg 画像でイシュタル弓問題を含むスクロールバー誤検出が
-            発生するケース。
+            jpg 画像でイシュタル弓問題を含むスクロールバー誤検出が発生するケース
+
             000 イシュタル弓問題
                 スクロールバー判定の閾値を 60 -> 61 に上げると解決する。
             001 スクロール可能領域をスクロールバーと誤検出
@@ -156,9 +263,18 @@ class PageinfoTest(unittest.TestCase):
         }
         self._test_guess_pageinfo(images_dir, expected)
 
+    def test_detect_qp_region_007(self):
+        images_dir = get_images_absdir('007')
+        expected = {
+            '000.jpg': 328845347,
+            '001.jpg': 172504749,
+        }
+        self._test_detect_qp_region(images_dir, expected)
+
     def test_guess_pageinfo_008(self):
         """
-            jpg 画像でスクロール可能領域の検出がされにくいケース。
+            jpg 画像でスクロール可能領域の検出がされにくいケース
+
             000 スクロール可能領域判定の閾値を 21 まで下げると解決する。
             001 スクロール可能領域判定の閾値を 18 まで下げると解決する。
         """
@@ -169,21 +285,39 @@ class PageinfoTest(unittest.TestCase):
         }
         self._test_guess_pageinfo(images_dir, expected)
 
+    def test_detect_qp_region_008(self):
+        images_dir = get_images_absdir('008')
+        expected = {
+            '000.jpg': 350300753,
+            '001.jpg': 115078733,
+        }
+        self._test_detect_qp_region(images_dir, expected)
+
     def test_guess_pageinfo_009(self):
         """
-            NA 版のスクリーンショットでエラーが出るケース。
+            NA 版のスクリーンショットでエラーが出るケース page
+
             000 誤差の許容範囲を広げることで解決。
-            001 左下のボタンのせいでQP領域をうまく拾えない。解決不能。
-                None が返されることを確認。
         """
         images_dir = get_images_absdir('009')
         pageinfo_expected = {
             '000.png': (1, 1, 3),
             '001.jpg': (2, 2, 4),
+            '002.jpg': (1, 1, 0),
         }
         self._test_guess_pageinfo(images_dir, pageinfo_expected)
+
+    def test_detect_qp_region_009(self):
+        """
+            NA 版のスクリーンショットでエラーが出るケース QP
+
+            001 左下のボタンのせいでQP領域をうまく拾えない。解決不能。
+                None が返されることを確認。
+        """
+        images_dir = get_images_absdir('009')
         qp_expected = {
-            '000.png': True,
-            '001.jpg': False,
+            '000.png': 357256131,
+            '001.jpg': None,
+            '002.jpg': 243903289,
         }
         self._test_detect_qp_region(images_dir, qp_expected)
