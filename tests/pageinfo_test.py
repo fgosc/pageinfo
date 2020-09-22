@@ -321,3 +321,33 @@ class PageinfoTest(unittest.TestCase):
             '002.jpg': 243903289,
         }
         self._test_detect_qp_region(images_dir, qp_expected)
+
+    def test_guess_pageinfo_010(self):
+        """
+            8行ドロップのスクリーンショット page
+        """
+        images_dir = get_images_absdir('010')
+        pageinfo_expected = {
+            '000.jpg': (1, 3, 7),
+            '001.jpg': (2, 3, 7),
+            '002.jpg': (3, 3, 7),
+            '003.png': (1, 3, 8),
+            '004.png': (2, 3, 8),
+            '005.png': (3, 3, 8),
+        }
+        self._test_guess_pageinfo(images_dir, pageinfo_expected)
+
+    def test_detect_qp_region_010(self):
+        """
+            8行ドロップのスクリーンショット QP
+        """
+        images_dir = get_images_absdir('010')
+        qp_expected = {
+            '000.jpg': 377361463,
+            '001.jpg': 377361463,
+            '002.jpg': 377361463,
+            '003.png': 17643053,
+            '004.png': 17643053,
+            '005.png': 17643053,
+        }
+        self._test_detect_qp_region(images_dir, qp_expected)
