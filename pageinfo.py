@@ -78,93 +78,6 @@ def filter_contour_qp(contour, im):
     return True
 
 
-def filter_contour_scrollbar(contour, im):
-    """
-        スクロールバー領域を拾い、それ以外を除外するフィルター
-
-        適合する場合は contour オブジェクトを、適合しない場合は None を返す。
-    """
-    im_h, im_w = im.shape[:2]
-    # 画像全体に対する検出領域の面積比が一定以上であること。
-    # 明らかに小さすぎる領域はここで捨てる。
-    if cv2.contourArea(contour) * 80 < im_w * im_h:
-        return None
-    x, y, w, h = cv2.boundingRect(contour)
-    logger.debug('scrollbar candidate: (x, y, width, height) = (%s, %s, %s, %s)', x, y, w, h)
-    # 縦長領域なので、幅に対して十分大きい高さになっていること。
-    if h < w * 5:
-        return None
-    logger.debug('scrollbar region: (x, y, width, height) = (%s, %s, %s, %s)', x, y, w, h)
-    logger.debug('found')
-    return contour
-
-
-def filter_contour_scrollable_area(contour, scrollbar_contour, im):
-    """
-        スクロール可能領域を拾い、それ以外を除外するフィルター
-
-        適合する場合は contour オブジェクトを、適合しない場合は None を返す。
-        ただし contour オブジェクトは近似図形に補正されることがある。
-    """
-    im_w, im_h = im.shape[:2]
-    # 画像全体に対する検出領域の面積比が一定以上であること。
-    # 明らかに小さすぎる領域はここで捨てる。
-    if cv2.contourArea(contour) * 50 < im_w * im_h:
-        return None
-    x, y, w, h = cv2.boundingRect(contour)
-    logger.debug('scrollable area candidate: (x, y, width, height) = (%s, %s, %s, %s)', x, y, w, h)
-
-    sx, sy, sw, sh = cv2.boundingRect(scrollbar_contour)
-
-    # スクロールバーより高さが低いものはダメ
-    if h < sh:
-        logger.debug('NG: height %s is less than scrollbar %s', h, sh)
-        return None
-
-    # 長方形に近似する
-    epsilon = 0.05 * cv2.arcLength(contour, True)
-    approx = cv2.approxPolyDP(contour, epsilon, True)
-    ax, ay, aw, ah = cv2.boundingRect(approx)
-    logger.debug('approx rectangle: (x, y, width, height) = (%s, %s, %s, %s)', ax, ay, aw, ah)
-
-    # 近似図形の幅はスクロールバーの幅+5以下
-    if aw > sw + 5:
-        logger.debug('NG: approx width %s is greater than scrollbar %s + 5', aw, sw)
-        return None
-
-    # 近似図形の x 座標はスクロールバーの幅 + 10 に収まること
-    if ax < sx - 10:
-        logger.debug('NG: approx x %s is more left than scrollbar %s - 10 = %s', ax, sx, sx - 10)
-        return None
-    if ax > sx + sw + 10:
-        logger.debug('NG: approx x %s is more right than scrollbar %s + width %s + 10 = %s', ax, sx, sw, sx + sw + 10)
-        return None
-
-    # 近似図形の上端はスクロールバーよりも高い位置
-    if ay > sy:
-        logger.debug('NG: approx top position %s is under the scrollbar top %s', ay, sy)
-        return None
-    # 近似図形の下端はスクロールバーよりも低い位置
-    if ay + ah < sy + sh:
-        logger.debug('NG: approx bottom position %s is over the scrollbar bottom %s', ay + ah, sy + sh)
-        return None
-
-    # 近似図形の高さはスクロールバーの幅の13倍以上16倍以下
-    if sw * 13 > ah:
-        logger.debug('NG: approx height %s is less than scrollbar width %s * 13 = %s', ah, sw, sw * 13)
-        return None
-    # TODO このアルゴリズムでは NA 版の昔の形式のスクリーンショットはうまく解釈できない。
-    # なぜなら、NA 版の昔の形式のスクリーンショットは幅がとても細いため、スクロールバーの
-    # 幅の16倍以下という条件をクリアできないから。
-    # 一時的にこの制限を外して検証してみるか？ 幅とx座標の位置を事前に検証済みなので
-    # 16倍以下の制限はなくてもいいかもしれない。
-    # if sw * 16 < ah:
-    #    return None
-
-    logger.debug('found')
-    return approx
-
-
 def detect_qp_region(im, mode=QPDetectionMode.JP.value, debug_draw_image=False, debug_image_name=None):
     """
         "所持 QP" 領域を検出し、その座標を返す。
@@ -301,6 +214,93 @@ def guess_lines(actual_height, entire_height):
     else:
         # 10 行以上は考慮しない
         return 9
+
+
+def filter_contour_scrollbar(contour, im):
+    """
+        スクロールバー領域を拾い、それ以外を除外するフィルター
+
+        適合する場合は contour オブジェクトを、適合しない場合は None を返す。
+    """
+    im_h, im_w = im.shape[:2]
+    # 画像全体に対する検出領域の面積比が一定以上であること。
+    # 明らかに小さすぎる領域はここで捨てる。
+    if cv2.contourArea(contour) * 80 < im_w * im_h:
+        return None
+    x, y, w, h = cv2.boundingRect(contour)
+    logger.debug('scrollbar candidate: (x, y, width, height) = (%s, %s, %s, %s)', x, y, w, h)
+    # 縦長領域なので、幅に対して十分大きい高さになっていること。
+    if h < w * 5:
+        return None
+    logger.debug('scrollbar region: (x, y, width, height) = (%s, %s, %s, %s)', x, y, w, h)
+    logger.debug('found')
+    return contour
+
+
+def filter_contour_scrollable_area(contour, scrollbar_contour, im):
+    """
+        スクロール可能領域を拾い、それ以外を除外するフィルター
+
+        適合する場合は contour オブジェクトを、適合しない場合は None を返す。
+        ただし contour オブジェクトは近似図形に補正されることがある。
+    """
+    im_w, im_h = im.shape[:2]
+    # 画像全体に対する検出領域の面積比が一定以上であること。
+    # 明らかに小さすぎる領域はここで捨てる。
+    if cv2.contourArea(contour) * 50 < im_w * im_h:
+        return None
+    x, y, w, h = cv2.boundingRect(contour)
+    logger.debug('scrollable area candidate: (x, y, width, height) = (%s, %s, %s, %s)', x, y, w, h)
+
+    sx, sy, sw, sh = cv2.boundingRect(scrollbar_contour)
+
+    # スクロールバーより高さが低いものはダメ
+    if h < sh:
+        logger.debug('NG: height %s is less than scrollbar %s', h, sh)
+        return None
+
+    # 長方形に近似する
+    epsilon = 0.05 * cv2.arcLength(contour, True)
+    approx = cv2.approxPolyDP(contour, epsilon, True)
+    ax, ay, aw, ah = cv2.boundingRect(approx)
+    logger.debug('approx rectangle: (x, y, width, height) = (%s, %s, %s, %s)', ax, ay, aw, ah)
+
+    # 近似図形の幅はスクロールバーの幅+5以下
+    if aw > sw + 5:
+        logger.debug('NG: approx width %s is greater than scrollbar %s + 5', aw, sw)
+        return None
+
+    # 近似図形の x 座標はスクロールバーの幅 + 10 に収まること
+    if ax < sx - 10:
+        logger.debug('NG: approx x %s is more left than scrollbar %s - 10 = %s', ax, sx, sx - 10)
+        return None
+    if ax > sx + sw + 10:
+        logger.debug('NG: approx x %s is more right than scrollbar %s + width %s + 10 = %s', ax, sx, sw, sx + sw + 10)
+        return None
+
+    # 近似図形の上端はスクロールバーよりも高い位置
+    if ay > sy:
+        logger.debug('NG: approx top position %s is under the scrollbar top %s', ay, sy)
+        return None
+    # 近似図形の下端はスクロールバーよりも低い位置
+    if ay + ah < sy + sh:
+        logger.debug('NG: approx bottom position %s is over the scrollbar bottom %s', ay + ah, sy + sh)
+        return None
+
+    # 近似図形の高さはスクロールバーの幅の13倍以上16倍以下
+    if sw * 13 > ah:
+        logger.debug('NG: approx height %s is less than scrollbar width %s * 13 = %s', ah, sw, sw * 13)
+        return None
+    # TODO このアルゴリズムでは NA 版の昔の形式のスクリーンショットはうまく解釈できない。
+    # なぜなら、NA 版の昔の形式のスクリーンショットは幅がとても細いため、スクロールバーの
+    # 幅の16倍以下という条件をクリアできないから。
+    # 一時的にこの制限を外して検証してみるか？ 幅とx座標の位置を事前に検証済みなので
+    # 16倍以下の制限はなくてもいいかもしれない。
+    # if sw * 16 < ah:
+    #    return None
+
+    logger.debug('found')
+    return approx
 
 
 def _detect_scrollbar_region(im, binary_threshold):
