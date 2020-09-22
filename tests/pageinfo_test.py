@@ -351,3 +351,23 @@ class PageinfoTest(unittest.TestCase):
             '005.png': 17643053,
         }
         self._test_detect_qp_region(images_dir, qp_expected)
+
+    def test_guess_pageinfo_011(self):
+        """
+            タップ軌跡の影響で矩形がゆがむケース page
+        """
+        images_dir = get_images_absdir('011')
+        pageinfo_expected = {
+            '000.png': (1, 1, 3),
+        }
+        self._test_guess_pageinfo(images_dir, pageinfo_expected)
+
+    def test_detect_qp_region_011(self):
+        """
+            タップ軌跡の影響で矩形がゆがむケース QP
+        """
+        images_dir = get_images_absdir('011')
+        qp_expected = {
+            '000.png': 288609041,
+        }
+        self._test_detect_qp_region(images_dir, qp_expected)
