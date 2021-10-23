@@ -28,7 +28,7 @@ class PageinfoTest(unittest.TestCase):
                 try:
                     actual = pageinfo.guess_pageinfo(im)
                     self.assertEqual(actual, expected[entry])
-                except pageinfo.CannotGuessError as e:
+                except Exception as e:
                     self.fail(f'{impath}: {e}')
 
     def _test_detect_qp_region(self, images_dir, expected):
@@ -52,7 +52,7 @@ class PageinfoTest(unittest.TestCase):
                     actual = self._get_qp_from_text(scan_text)
                     self.assertEqual(actual, _expected)
 
-                except pageinfo.CannotGuessError as e:
+                except Exception as e:
                     self.fail(f'{impath}: {e}')
 
     def _extract_text_from_image(self, image):
@@ -371,3 +371,38 @@ class PageinfoTest(unittest.TestCase):
             '000.png': 288609041,
         }
         self._test_detect_qp_region(images_dir, qp_expected)
+
+    def test_guess_pageinfo_012(self):
+        """
+            9行以上ドロップ page
+        """
+        images_dir = get_images_absdir('012')
+        pageinfo_expected = {
+            '62/000.png': (1, 3, 9),
+            '62/001.png': (2, 3, 9),
+            '62/002.png': (3, 3, 9),
+            '64/000.png': (1, 4, 10),
+            '64/001.png': (2, 4, 10),
+            '64/002.png': (3, 4, 10),
+            '64/003.png': (4, 4, 10),
+            '72/000.png': (1, 4, 11),
+            '72/001.png': (2, 4, 11),
+            '72/002.png': (3, 4, 11),
+            '72/003.png': (4, 4, 11),
+            '93/000.png': (1, 5, 14),
+            '93/001.png': (2, 5, 14),
+            '93/002.png': (3, 5, 14),
+            '93/003.png': (4, 5, 14),
+            '93/004.png': (5, 5, 14),
+            '98/000.png': (1, 5, 15),
+            '98/001.png': (2, 5, 15),
+            '98/002.png': (3, 5, 15),
+            '98/003.png': (4, 5, 15),
+            '98/004.png': (5, 5, 15),
+            '100/000.png': (1, 5, 15),
+            '100/001.png': (2, 5, 15),
+            '100/002.png': (3, 5, 15),
+            '100/003.png': (4, 5, 15),
+            '100/004.png': (5, 5, 15),
+        }
+        self._test_guess_pageinfo(images_dir, pageinfo_expected)
