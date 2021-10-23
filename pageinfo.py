@@ -199,7 +199,7 @@ def guess_pagenum(actual_y, entire_y, actual_height, entire_height, cap_height):
     inner_height = actual_height - cap_height * 2
     height_ratio = inner_height / entire_height
     ratio = delta / entire_height
-    logger.info(
+    logger.debug(
         'guess_pagenum> space above scrollbar: %s, actual_y: %s, entire_y: %s, inner_height: %s, entire_height: %s, ratio: %s, height_ratio: %s, r/h = %s',
         delta, actual_y, entire_y, inner_height, entire_height, ratio, height_ratio, ratio / height_ratio,
     )
@@ -217,7 +217,7 @@ def guess_lines(actual_height, entire_height, cap_height):
         スクロールバーを用いる関係上、原理的に 2 行以下は推定不可
     """
     ratio = (actual_height - cap_height * 2) / entire_height
-    logger.info('guess_lines> scrollbar ratio: %s', ratio)
+    logger.debug('guess_lines> scrollbar ratio: %s', ratio)
 
     if ratio > 0.90:
         return 3
