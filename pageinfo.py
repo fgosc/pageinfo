@@ -241,9 +241,9 @@ def guess_lines(actual_height, entire_height, cap_height):
         return 12   # -83
     elif ratio > 0.228: 
         return 13   # -90
-    elif ratio > 0.213:  # 実測値 0.2164-0.2203
+    elif ratio > 0.214:  # 実測値 0.2164-0.2203
         return 14   # -97
-    elif ratio > 0.191:  # 実測値 0.1932-0.2060
+    elif ratio > 0.191:  # 実測値 0.1932-0.2132
         return 15   # -104
     else:
         # 15 行以上は考慮しない
