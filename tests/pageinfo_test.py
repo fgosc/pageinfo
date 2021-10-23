@@ -406,3 +406,38 @@ class PageinfoTest(unittest.TestCase):
             '100/004.png': (5, 5, 15),
         }
         self._test_guess_pageinfo(images_dir, pageinfo_expected)
+
+    def test_detect_qp_region_012(self):
+        """
+            9行以上ドロップ page
+        """
+        images_dir = get_images_absdir('012')
+        pageinfo_expected = {
+            '62/000.png': 65638587,
+            '62/001.png': 65638587,
+            '62/002.png': 65638587,
+            '64/000.png': 65736387,
+            '64/001.png': 65736387,
+            '64/002.png': 65736387,
+            '64/003.png': 65736387,
+            '72/000.png': 65743787,
+            '72/001.png': 65743787,
+            '72/002.png': 65743787,
+            '72/003.png': 65743787,
+            '93/000.png': 90349741,
+            '93/001.png': 90349741,
+            '93/002.png': 90349741,
+            '93/003.png': 90349741,
+            '93/004.png': 90349741,
+            '98/000.png': 94449841,
+            '98/001.png': 94449841,
+            '98/002.png': 94449841,
+            '98/003.png': 94449841,
+            '98/004.png': 94449841,
+            '100/000.png': 71594707,
+            '100/001.png': 71594707,
+            '100/002.png': 71594707,
+            '100/003.png': 71594707,
+            '100/004.png': 71594707,
+        }
+        self._test_detect_qp_region(images_dir, pageinfo_expected)

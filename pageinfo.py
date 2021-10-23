@@ -109,27 +109,34 @@ def detect_qp_region(im, mode=QPDetectionMode.JP.value, debug_draw_image=False, 
     for contour in filtered_contours:
         logger.debug('detected areas: %s', cv2.boundingRect(contour))
 
-    # 左右の無駄領域を除外するためのマージン。
-    #
-    # The position of the QP values in the NA version of the screenshot is
-    # slightly more to the right than in the JP version. This makes it
-    # difficult to apply the same cut position to both types of screenshots.
-    if mode == QPDetectionMode.NA.value:
-        # The values below are optimized for NA's new game screen layout.
-        # Old layout screenshots can also be applied, but may not cut well.
-        left_margin = 0.45
-        right_margin = 0.02
-    else:
-        # 感覚的な値ではあるが 左 42%, 右 4% を除外。
-        # 落とし穴として、2019年5月末 ～ 9月の間に所持 QP の出力位置が微妙に変わっている。
-        # ここではそのどちらのケースでも対応できるよう枠を広めに取っている。
-        # 現仕様に最適化して切り詰めすぎると困ったことになるため注意。
-        left_margin = 0.42
-        right_margin = 0.04
-
     if len(filtered_contours) == 1:
         qp_region = filtered_contours[0]
         x, y, w, h = cv2.boundingRect(qp_region)
+
+        wh_rate = w / h
+
+        # 左右の無駄領域を除外するためのマージン。
+        #
+        # The position of the QP values in the NA version of the screenshot is
+        # slightly more to the right than in the JP version. This makes it
+        # difficult to apply the same cut position to both types of screenshots.
+        if mode == QPDetectionMode.NA.value:
+            # The values below are optimized for NA's new game screen layout.
+            # Old layout screenshots can also be applied, but may not cut well.
+            left_margin = 0.45
+            right_margin = 0.02
+        else:
+            # イベントで所持 QP 枠が狭くなる場合、カットする領域を狭める必要がある。
+            if wh_rate < 9:
+                left_margin = 0.45
+                right_margin = 0.04
+            else:
+                # 感覚的な値ではあるが 左 42%, 右 4% を除外。
+                # 落とし穴として、2019年5月末 ～ 9月の間に所持 QP の出力位置が微妙に変わっている。
+                # ここではそのどちらのケースでも対応できるよう枠を広めに取っている。
+                # 現仕様に最適化して切り詰めすぎると困ったことになるため注意。
+                left_margin = 0.42
+                right_margin = 0.04
 
         topleft = (x + int(w*left_margin), y)
         bottomright = (topleft[0] + w - int(w*left_margin) - int(w*right_margin), y + h)
