@@ -2,6 +2,7 @@ import os
 import re
 import unittest
 from logging import getLogger
+from pathlib import Path
 
 import cv2
 import pytesseract
@@ -18,30 +19,39 @@ def get_images_absdir(dirname):
 
 class PageinfoTest(unittest.TestCase):
     def _test_guess_pageinfo(self, images_dir, expected):
-        for entry in os.listdir(images_dir):
+        for entry in Path(images_dir).glob("*/*"):
             if os.path.splitext(entry)[1] not in ('.png', '.jpg'):
+                logger.warning("not a image file: %s", entry)
                 continue
-            impath = os.path.join(images_dir, entry)
+            impath = str(entry)
+            relpath = impath.replace(images_dir + "/", "")
+            if relpath not in expected:
+                continue
+
             with self.subTest(image=impath):
                 im = cv2.imread(impath)
-                logger.debug(impath)
                 try:
                     actual = pageinfo.guess_pageinfo(im)
-                    self.assertEqual(actual, expected[entry])
-                except pageinfo.CannotGuessError as e:
+                    self.assertEqual(actual, expected[relpath])
+
+                except Exception as e:
                     self.fail(f'{impath}: {e}')
 
     def _test_detect_qp_region(self, images_dir, expected):
-        for entry in os.listdir(images_dir):
+        for entry in Path(images_dir).glob("*/*"):
             if os.path.splitext(entry)[1] not in ('.png', '.jpg'):
+                logger.warning("not a image file: %s", entry)
                 continue
-            impath = os.path.join(images_dir, entry)
+            impath = str(entry)
+            relpath = impath.replace(images_dir + "/", "")
+            if relpath not in expected:
+                continue
+
             with self.subTest(image=impath):
                 im = cv2.imread(impath)
-                logger.debug(impath)
                 try:
                     coordinates = pageinfo.detect_qp_region(im)
-                    _expected = expected[entry]
+                    _expected = expected[relpath]
                     if _expected is None:
                         self.assertIsNone(coordinates)
                         continue
@@ -52,7 +62,7 @@ class PageinfoTest(unittest.TestCase):
                     actual = self._get_qp_from_text(scan_text)
                     self.assertEqual(actual, _expected)
 
-                except pageinfo.CannotGuessError as e:
+                except Exception as e:
                     self.fail(f'{impath}: {e}')
 
     def _extract_text_from_image(self, image):
@@ -371,3 +381,87 @@ class PageinfoTest(unittest.TestCase):
             '000.png': 288609041,
         }
         self._test_detect_qp_region(images_dir, qp_expected)
+
+    def test_guess_pageinfo_012(self):
+        """
+            9行以上ドロップ page
+        """
+        images_dir = get_images_absdir('012')
+        pageinfo_expected = {
+            '62/000.jpg': (1, 3, 9),
+            '62/001.jpg': (2, 3, 9),
+            '62/002.jpg': (3, 3, 9),
+            '64/000.jpg': (1, 4, 10),
+            '64/001.jpg': (2, 4, 10),
+            '64/002.jpg': (3, 4, 10),
+            '64/003.jpg': (4, 4, 10),
+            '72/000.jpg': (1, 4, 11),
+            '72/001.jpg': (2, 4, 11),
+            '72/002.jpg': (3, 4, 11),
+            '72/003.jpg': (4, 4, 11),
+            '82/000.jpg': (1, 4, 12),
+            '82/001.jpg': (2, 4, 12),
+            '82/002.jpg': (3, 4, 12),
+            '82/003.jpg': (4, 4, 12),
+            '90/000.jpg': (1, 5, 13),
+            '90/001.jpg': (2, 5, 13),
+            '90/002.jpg': (3, 5, 13),
+            '90/003.jpg': (4, 5, 13),
+            '90/004.jpg': (5, 5, 13),
+            '93/000.jpg': (1, 5, 14),
+            '93/001.jpg': (2, 5, 14),
+            '93/002.jpg': (3, 5, 14),
+            '93/003.jpg': (4, 5, 14),
+            '93/004.jpg': (5, 5, 14),
+            '98/000.jpg': (1, 5, 15),
+            '98/001.jpg': (2, 5, 15),
+            '98/002.jpg': (3, 5, 15),
+            '98/003.jpg': (4, 5, 15),
+            '98/004.jpg': (5, 5, 15),
+            '100/000.jpg': (1, 5, 15),
+            '100/001.jpg': (2, 5, 15),
+            '100/002.jpg': (3, 5, 15),
+            '100/003.jpg': (4, 5, 15),
+            '100/004.jpg': (5, 5, 15),
+        }
+        self._test_guess_pageinfo(images_dir, pageinfo_expected)
+
+    def test_detect_qp_region_012(self):
+        """
+            9行以上ドロップ qp
+        """
+        images_dir = get_images_absdir('012')
+        pageinfo_expected = {
+            '62/000.jpg': 65638587,
+            '62/001.jpg': 65638587,
+            '62/002.jpg': 65638587,
+            '64/000.jpg': 65736387,
+            '64/001.jpg': 65736387,
+            '64/002.jpg': 65736387,
+            '64/003.jpg': 65736387,
+            '72/000.jpg': 65743787,
+            '72/001.jpg': 65743787,
+            '72/002.jpg': 65743787,
+            '72/003.jpg': 65743787,
+            '82/000.jpg': 71925747,
+            '82/001.jpg': 71925747,
+            '82/002.jpg': 71925747,
+            '82/003.jpg': 71925747,
+            '90/000.jpg': 68906947,
+            '90/001.jpg': 68906947,
+            '90/002.jpg': 68906947,
+            '90/003.jpg': 68906947,
+            '90/004.jpg': 68906947,
+            '93/000.jpg': 90349741,
+            '93/001.jpg': 90349741,
+            '93/002.jpg': 90349741,
+            '93/003.jpg': 90349741,
+            '93/004.jpg': 90349741,
+            '98/000.jpg': 94449841,
+            '98/001.jpg': 94449841,
+            '98/002.jpg': 94449841,
+            '98/003.jpg': 94449841,
+            '98/004.jpg': 94449841,
+            # 100/*.jpg は解像度が低いため枠を検出できない
+        }
+        self._test_detect_qp_region(images_dir, pageinfo_expected)
