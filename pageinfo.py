@@ -383,7 +383,7 @@ def _likely_to_same_contour(contour0, contour1):
     return True
 
 
-def _imwrite_debug(im, filename, suffix):
+def _imwrite_debug(filename, im, suffix):
     base, ext = os.path.splitext(filename)
     name = f"{base}_{suffix}{ext}"
     cv2.imwrite(name, im)
