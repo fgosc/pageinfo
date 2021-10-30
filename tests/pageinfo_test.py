@@ -19,12 +19,14 @@ def get_images_absdir(dirname):
 
 class PageinfoTest(unittest.TestCase):
     def _test_guess_pageinfo(self, images_dir, expected):
-        for entry in Path(images_dir).glob("*/*"):
-            if os.path.splitext(entry)[1] not in ('.png', '.jpg'):
+        for entry in Path(images_dir).glob("**/*"):
+            if entry.is_dir():
+                continue
+            if entry.suffix not in ('.png', '.jpg'):
                 logger.warning("not a image file: %s", entry)
                 continue
             impath = str(entry)
-            relpath = impath.replace(images_dir + "/", "")
+            relpath = str(entry.relative_to(images_dir))
             if relpath not in expected:
                 continue
 
@@ -38,12 +40,14 @@ class PageinfoTest(unittest.TestCase):
                     self.fail(f'{impath}: {e}')
 
     def _test_detect_qp_region(self, images_dir, expected):
-        for entry in Path(images_dir).glob("*/*"):
-            if os.path.splitext(entry)[1] not in ('.png', '.jpg'):
+        for entry in Path(images_dir).glob("**/*"):
+            if entry.is_dir():
+                continue
+            if entry.suffix not in ('.png', '.jpg'):
                 logger.warning("not a image file: %s", entry)
                 continue
             impath = str(entry)
-            relpath = impath.replace(images_dir + "/", "")
+            relpath = str(entry.relative_to(images_dir))
             if relpath not in expected:
                 continue
 
@@ -484,6 +488,6 @@ class PageinfoTest(unittest.TestCase):
         images_dir = get_images_absdir('013')
         qp_expected = {
             '000.jpg': 993204351,
-            '000.jpg': 993247551,
+            '001.jpg': 993247551,
         }
         self._test_detect_qp_region(images_dir, qp_expected)
