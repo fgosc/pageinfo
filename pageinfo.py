@@ -337,13 +337,6 @@ def filter_contour_scrollable_area(contour, scrollbar_contour, im):
     if sw * 13 > ah:
         logger.debug('NG: approx height %s is less than scrollbar width %s * 13 = %s', ah, sw, sw * 13)
         return None
-    # TODO このアルゴリズムでは NA 版の昔の形式のスクリーンショットはうまく解釈できない。
-    # なぜなら、NA 版の昔の形式のスクリーンショットは幅がとても細いため、スクロールバーの
-    # 幅の16倍以下という条件をクリアできないから。
-    # 一時的にこの制限を外して検証してみるか？ 幅とx座標の位置を事前に検証済みなので
-    # 16倍以下の制限はなくてもいいかもしれない。
-    # if sw * 16 < ah:
-    #    return None
 
     logger.debug('found')
     return approx
