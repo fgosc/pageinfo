@@ -409,7 +409,7 @@ def guess_pageinfo(im, debug_draw_image=False, debug_image_name=None, **kwargs):
     logger.debug('cropped image size (for scrollbar): (width, height) = (%s, %s)', cr_w, cr_h)
     cropped_gray = cv2.cvtColor(cropped, cv2.COLOR_BGR2GRAY)
 
-    next_button = cv2.imread(str(pageinfo_basedir / "resources" / "next.png"))
+    next_button = cv2.imread(str(pageinfo_basedir / "data" / "pageinfo" / "next.png"))
     next_button_gray = cv2.cvtColor(next_button, cv2.COLOR_BGR2GRAY)
     gamescreen_type = get_gamescreen_type(cropped_gray, next_button_gray)
 
