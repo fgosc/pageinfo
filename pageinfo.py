@@ -68,6 +68,10 @@ class TooManyAreasDetectedError(PageInfoError):
     pass
 
 
+class UnsupportedGamescreenTypeError(PageInfoError):
+    pass
+
+
 def filter_contour_qp(contour, im):
     """
         "所持 QP" エリアを拾い、それ以外を除外するフィルター
@@ -369,7 +373,7 @@ def _compute_scrollable_area_position_and_height(im_height, gamescreen_type):
         vertical_position_rate = 0.122
         height_rate = 0.56
     else:
-        raise
+        raise UnsupportedGamescreenTypeError("unsupported gamescreen type: %s", gamescreen_type)
 
     vertical_position = round(im_height * vertical_position_rate)
     scrollable_area_height = round(im_height * height_rate)
