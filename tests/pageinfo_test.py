@@ -19,12 +19,14 @@ def get_images_absdir(dirname):
 
 class PageinfoTest(unittest.TestCase):
     def _test_guess_pageinfo(self, images_dir, expected):
-        for entry in Path(images_dir).glob("*/*"):
-            if os.path.splitext(entry)[1] not in ('.png', '.jpg'):
+        for entry in Path(images_dir).glob("**/*"):
+            if entry.is_dir():
+                continue
+            if entry.suffix not in ('.png', '.jpg'):
                 logger.warning("not a image file: %s", entry)
                 continue
             impath = str(entry)
-            relpath = impath.replace(images_dir + "/", "")
+            relpath = str(entry.relative_to(images_dir))
             if relpath not in expected:
                 continue
 
@@ -38,12 +40,14 @@ class PageinfoTest(unittest.TestCase):
                     self.fail(f'{impath}: {e}')
 
     def _test_detect_qp_region(self, images_dir, expected):
-        for entry in Path(images_dir).glob("*/*"):
-            if os.path.splitext(entry)[1] not in ('.png', '.jpg'):
+        for entry in Path(images_dir).glob("**/*"):
+            if entry.is_dir():
+                continue
+            if entry.suffix not in ('.png', '.jpg'):
                 logger.warning("not a image file: %s", entry)
                 continue
             impath = str(entry)
-            relpath = impath.replace(images_dir + "/", "")
+            relpath = str(entry.relative_to(images_dir))
             if relpath not in expected:
                 continue
 
@@ -465,3 +469,25 @@ class PageinfoTest(unittest.TestCase):
             # 100/*.jpg は解像度が低いため枠を検出できない
         }
         self._test_detect_qp_region(images_dir, pageinfo_expected)
+
+    def test_guess_pageinfo_013(self):
+        """
+            村正のマントでスクロール可能領域が縦に広がるケース page
+        """
+        images_dir = get_images_absdir('013')
+        pageinfo_expected = {
+            '000.jpg': (1, 1, 3),
+            '001.jpg': (1, 1, 3),
+        }
+        self._test_guess_pageinfo(images_dir, pageinfo_expected)
+
+    def test_detect_qp_region_013(self):
+        """
+            村正のマントでスクロール可能領域が縦に広がるケース QP
+        """
+        images_dir = get_images_absdir('013')
+        qp_expected = {
+            '000.jpg': 993204351,
+            '001.jpg': 993247551,
+        }
+        self._test_detect_qp_region(images_dir, qp_expected)
