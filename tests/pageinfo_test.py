@@ -491,3 +491,25 @@ class PageinfoTest(unittest.TestCase):
             '001.jpg': 993247551,
         }
         self._test_detect_qp_region(images_dir, qp_expected)
+
+    def test_guess_pageinfo_014(self):
+        """
+            背景の木をスクロールバーと判定してしまうケース page
+        """
+        images_dir = get_images_absdir('014')
+        pageinfo_expected = {
+            '000.jpg': (1, 1, 0),
+            '001.jpg': (1, 1, 0),
+        }
+        self._test_guess_pageinfo(images_dir, pageinfo_expected)
+
+    def test_detect_qp_region_014(self):
+        """
+            背景の木をスクロールバーと判定してしまうケース QP
+        """
+        images_dir = get_images_absdir('014')
+        qp_expected = {
+            '000.jpg': 404036268,
+            '001.jpg': 403885798,
+        }
+        self._test_detect_qp_region(images_dir, qp_expected)
