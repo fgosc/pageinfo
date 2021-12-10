@@ -513,3 +513,23 @@ class PageinfoTest(unittest.TestCase):
             '001.jpg': 403885798,
         }
         self._test_detect_qp_region(images_dir, qp_expected)
+
+    def test_guess_pageinfo_015(self):
+        """
+            左右に黒余白がある (new iPad mini) page
+        """
+        images_dir = get_images_absdir('015')
+        pageinfo_expected = {
+            '000.jpg': (1, 1, 3),
+        }
+        self._test_guess_pageinfo(images_dir, pageinfo_expected)
+
+    def test_detect_qp_region_014(self):
+        """
+            左右に黒余白がある (new iPad mini) QP
+        """
+        images_dir = get_images_absdir('015')
+        qp_expected = {
+            '000.jpg': 1106700890,
+        }
+        self._test_detect_qp_region(images_dir, qp_expected)
