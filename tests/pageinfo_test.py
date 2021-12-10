@@ -524,7 +524,7 @@ class PageinfoTest(unittest.TestCase):
         }
         self._test_guess_pageinfo(images_dir, pageinfo_expected)
 
-    def test_detect_qp_region_014(self):
+    def test_detect_qp_region_015(self):
         """
             左右に黒余白がある (new iPad mini) QP
         """
