@@ -82,8 +82,8 @@ def detect_side_black_margin(im_gray):
     height, width = im_gray.shape[:2]
     # 黒とみなす範囲: 0 に近いほど許容範囲が小さい
     black_threshold = 10
-    # タップの軌跡などノイズが混入する可能性もあるので 5 % まではイレギュラーを許容する
-    black_ratio = 0.95
+    # タップの軌跡などノイズが混入する可能性もあるので 11 % まではイレギュラーを許容する
+    black_ratio = 0.89
 
     for i in range(width):
         black_pixels = sum([pixel < black_threshold for pixel in im_gray[:, i]])
