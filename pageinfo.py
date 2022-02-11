@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # MIT License
-# Copyright 2020 max747
+# Copyright 2020-2022 max747
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the 
@@ -124,6 +124,25 @@ def filter_contour_qp(contour, im):
     # 長すぎる場合は画面下部の端末別表示調整用領域を検出している可能性がある。
     if not (w * 1.2 < im_w < w * 2):
         return False
+    # 検出位置が端に寄りすぎていないこと。
+    # 上
+    margin_h = im_h // 10
+    if y < margin_h:
+        logger.debug('too close to the top edge')
+        return False
+    # 下
+    if y + h > im_h - margin_h:
+        logger.debug('too close to the bottom edge')
+        return False
+    # 左
+    margin_w = im_w // 10
+    if x < margin_w:
+        logger.debug('too close to the left edge')
+        return False
+    # 右はチェックしない。
+    # もともとのレイアウトの関係で右に寄りがちなので、誤判定の可能性が高くなる。
+    # また、右に寄りすぎている領域の検出自体が考えにくい。
+
     logger.debug('qp region: (x, y, width, height) = (%s, %s, %s, %s)', x, y, w, h)
     return True
 
