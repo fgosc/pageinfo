@@ -533,3 +533,23 @@ class PageinfoTest(unittest.TestCase):
             '000.jpg': 1106700890,
         }
         self._test_detect_qp_region(images_dir, qp_expected)
+
+    def test_guess_pageinfo_016(self):
+        """
+            QP領域の検出でフチを矩形として検出してしまう page
+        """
+        images_dir = get_images_absdir('016')
+        pageinfo_expected = {
+            '000.jpg': (1, 2, 4),
+        }
+        self._test_guess_pageinfo(images_dir, pageinfo_expected)
+
+    def test_detect_qp_region_016(self):
+        """
+            QP領域の検出でフチを矩形として検出してしまう qp
+        """
+        images_dir = get_images_absdir('016')
+        qp_expected = {
+            '000.jpg': 1869090954,
+        }
+        self._test_detect_qp_region(images_dir, qp_expected)
