@@ -5,10 +5,10 @@ verify_ssl = true
 
 [dev-packages]
 pytesseract = "*"
+pytest = "*"
 
 [packages]
 opencv-python = "*"
-pytest = "*"
 
 [requires]
 python_version = "3.8"
