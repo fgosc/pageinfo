@@ -553,3 +553,25 @@ class PageinfoTest(unittest.TestCase):
             '000.jpg': 1869090954,
         }
         self._test_detect_qp_region(images_dir, qp_expected)
+
+    def test_guess_pageinfo_017(self):
+        """
+            threshold を超えて line: 4 と判定されてしまう page
+        """
+        images_dir = get_images_absdir('017')
+        pageinfo_expected = {
+            '000.jpg': (1, 1, 3),
+            '001.jpg': (1, 1, 3),
+        }
+        self._test_guess_pageinfo(images_dir, pageinfo_expected)
+
+    def test_detect_qp_region_017(self):
+        """
+            threshold を超えて line: 4 と判定されてしまう qp
+        """
+        images_dir = get_images_absdir('017')
+        qp_expected = {
+            '000.jpg': 1981323944,
+            '001.jpg': 2000000000,
+        }
+        self._test_detect_qp_region(images_dir, qp_expected)
