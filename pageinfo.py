@@ -292,7 +292,7 @@ def guess_lines(actual_height, entire_height, cap_height):
     ratio = (actual_height - cap_height * 2) / entire_height
     logger.debug('guess_lines> scrollbar ratio: %s', ratio)
 
-    if ratio > 0.90:
+    if ratio > 0.89:
         return 3
     elif ratio > 0.65:  # 実測値 0.688
         return 4
