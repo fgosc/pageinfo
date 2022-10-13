@@ -575,3 +575,25 @@ class PageinfoTest(unittest.TestCase):
             '001.jpg': 2000000000,
         }
         self._test_detect_qp_region(images_dir, qp_expected)
+
+    def test_guess_pageinfo_018(self):
+        """
+            wide screen の場合にスクロールバーが検出されない page
+        """
+        images_dir = get_images_absdir('018')
+        pageinfo_expected = {
+            '000.png': (1, 2, 4),
+            '001.png': (2, 2, 4),
+        }
+        self._test_guess_pageinfo(images_dir, pageinfo_expected)
+
+    def test_detect_qp_region_018(self):
+        """
+            wide screen の場合にスクロールバーが検出されない qp
+        """
+        images_dir = get_images_absdir('018')
+        qp_expected = {
+            '000.png': 1156319000,
+            '001.png': 1156319000,
+        }
+        self._test_detect_qp_region(images_dir, qp_expected)

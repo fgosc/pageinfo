@@ -42,8 +42,10 @@ NOSCROLL_PAGE_INFO = (1, 1, 0)
 SCRB_LIKELY_SCROLLBAR = 1   # スクロールバーと推定
 SCRB_TOO_SMALL = 2  # 領域が小さすぎる
 SCRB_TOO_THICK = 3  # 領域の横幅が太すぎる
-SCRB_TOO_FAR = 4    # 中央から遠すぎる
+SCRB_TOO_FAR_FROM_CENTER = 4    # 中央から遠すぎる
 SCRB_TOO_MANY_VERTICES = 5  # 頂点が多すぎる
+SCRB_TOO_FAR_FROM_LEFT_EDGE = 6  # 左端から遠すぎる
+SCRB_TOO_CLOSE_TO_LEFT_EDGE = 7  # 左端に近すぎる
 
 GS_TYPE_1 = 1   # 旧画面
 GS_TYPE_2 = 2   # wide screen 対応画面。戦利品ウィンドウの位置が上にシフトした
@@ -342,9 +344,35 @@ def _filter_contour_scrollbar(contour, im_height, im_width):
         return SCRB_TOO_THICK
 
     # 検出領域の x 座標が画面端よりも中央線に近いこと。
-    if abs(x - im_width / 2) > im_width / 4:
-        logger.debug("NG: far from center line: potition x = %s, width = %s, center = %s", x, im_width, im_width / 2)
-        return SCRB_TOO_FAR
+    # wide screen の場合は逆に端に寄ってしまう。wide screen かどうかを先に調べて、その場合は離れているかどうかをテストする。
+    width_range = im_width / 4
+
+    if im_width / im_height > 0.55:
+        # wide screen
+        # この場合、スクロールバーは左端に寄った形になるはず。
+        if x > width_range:
+            logger.debug(
+                "NG: far from left edge: potition x = %s, width = %s, range = %s",
+                x, im_width, width_range,
+            )
+            return SCRB_TOO_FAR_FROM_LEFT_EDGE
+
+        # 左端のアイテム画像の切れ端をスクロールバーと誤認する問題があるため、左端を検出した場合は落とす。
+        if x < width_range / 2:
+            logger.debug(
+                "NG: too close to left edge: potition x = %s, width = %s, range = %s",
+                x, im_width, width_range / 2,
+            )
+            return SCRB_TOO_CLOSE_TO_LEFT_EDGE
+
+    else:
+        # normal screen
+        if abs(x - im_width / 2) > width_range:
+            logger.debug(
+                "NG: far from center line: potition x = %s, width = %s, center = %s, range = %s",
+                x, im_width, im_width / 2, width_range,
+            )
+            return SCRB_TOO_FAR_FROM_CENTER
 
     # 頂点の数が多すぎないこと。
     if len(contour) > 150:
