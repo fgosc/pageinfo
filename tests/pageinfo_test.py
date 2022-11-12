@@ -597,3 +597,23 @@ class PageinfoTest(unittest.TestCase):
             '001.png': 1156319000,
         }
         self._test_detect_qp_region(images_dir, qp_expected)
+
+    def test_guess_pageinfo_019(self):
+        """
+            千年城背景の影響でスクロールバーがジャギーになり頂点数が許容値を超える page
+        """
+        images_dir = get_images_absdir('019')
+        pageinfo_expected = {
+            '000.jpg': (2, 2, 6),
+        }
+        self._test_guess_pageinfo(images_dir, pageinfo_expected)
+
+    def test_detect_qp_region_019(self):
+        """
+            千年城背景の影響でスクロールバーがジャギーになり頂点数が許容値を超える qp
+        """
+        images_dir = get_images_absdir('019')
+        qp_expected = {
+            '000.jpg': 24755544,
+        }
+        self._test_detect_qp_region(images_dir, qp_expected)
