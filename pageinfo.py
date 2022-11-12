@@ -46,7 +46,7 @@ SCRB_TOO_FAR_FROM_CENTER = 4    # 中央から遠すぎる
 SCRB_TOO_MANY_VERTICES = 5  # 頂点が多すぎる
 SCRB_TOO_FAR_FROM_LEFT_EDGE = 6  # 左端から遠すぎる
 SCRB_TOO_CLOSE_TO_LEFT_EDGE = 7  # 左端に近すぎる
-SCRB_TOO_THIN = 4 # 領域の横幅が細すぎる
+SCRB_TOO_THIN = 8   # 領域の横幅が細すぎる
 
 GS_TYPE_1 = 1   # 旧画面
 GS_TYPE_2 = 2   # wide screen 対応画面。戦利品ウィンドウの位置が上にシフトした
