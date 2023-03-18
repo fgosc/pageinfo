@@ -617,3 +617,29 @@ class PageinfoTest(unittest.TestCase):
             '000.jpg': 24755544,
         }
         self._test_detect_qp_region(images_dir, qp_expected)
+
+    def test_guess_pageinfo_020(self):
+        """
+            右端が黒背景の場合にスクロールバーが検出されない page
+        """
+        images_dir = get_images_absdir('020')
+        pageinfo_expected = {
+            '000.png': (1, 2, 4),
+            '001.png': (2, 2, 4),
+            '002.png': (1, 2, 4),
+            '003.png': (2, 2, 4),
+        }
+        self._test_guess_pageinfo(images_dir, pageinfo_expected)
+
+    def test_detect_qp_region_020(self):
+        """
+            右端が黒背景の場合にスクロールバーが検出されない qp
+        """
+        images_dir = get_images_absdir('020')
+        qp_expected = {
+            '000.png': 1970152495,
+            '001.png': 1970152495,
+            '002.png': 1970155395,
+            '003.png': 1970155395,
+        }
+        self._test_detect_qp_region(images_dir, qp_expected)
